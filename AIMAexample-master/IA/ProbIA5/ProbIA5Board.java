@@ -224,9 +224,19 @@ public class ProbIA5Board {
 		return distanciesOrdenades;
 	}
 	
-	private int NearFreeS2(int i1, int ns, int nc, ArrayList<Boolean> used, ArrayList<Integer> hijos) {
+		private int NearFreeS2(int i1, int ns, int nc, ArrayList<Boolean> used, ArrayList<Integer> hijos) {
 		for (int i= nc; i<nc+ns; ++i){
     		int i2 = distanciesOrdenades.get(i1).get(i).index;  // el for va de nc+1 (mas cercano) a nc+ns (mas lejano) comparando si estan libres
+                System.out.println(i2+" used " + used.get(i2)+ " hijos " + hijos.get(i2));
+    		if (used.get(i2) == false && hijos.get(i2)<2) return i2; // used == true implica que solo se unira a un nodo que ya se haya tratado y este formando parte de un arbol
+		}
+		return -1;
+	}
+        
+        private int NearFreeS3(int i1, int ns, int nc, ArrayList<Boolean> used, ArrayList<Integer> hijos) {
+		for (int i= nc; i<nc+ns; ++i){
+    		int i2 = distanciesOrdenades.get(i1).get(i).index;  // el for va de nc+1 (mas cercano) a nc+ns (mas lejano) comparando si estan libres
+                System.out.println(i2+" used " + used.get(i2)+ " hijos " + hijos.get(i2));
     		if (used.get(i2) == true && hijos.get(i2)<2) return i2; // used == true implica que solo se unira a un nodo que ya se haya tratado y este formando parte de un arbol
 		}
 		return -1;
@@ -356,38 +366,51 @@ public class ProbIA5Board {
     public void printsol(){
         for(Tree t :sol)t.print();
     }
-   
     
+    public void init3(){ //roundrobin de centros para escoger su mas cercano + sensor mas cercano cuando se saturan
 
-
-	/*public Map<Integer,Integer> Init2(int nc, int ns){
-
-		distanciesOrdenades = Ordenar(m_dist);
-
-		for (int i = 0; i < hijos.size();++i) hijos.set(i,0);
-    	Map<Integer,Integer> firstSol = new TreeMap<Integer,Integer>();
-    	ArrayList<Boolean> used = new ArrayList<Boolean>(ns);
+	distanciesOrdenades = Ordenar(m_dist);
+        int nc = numCentros;
+    	int ns = numSensores;
+        sol = new ArrayList<Tree> (); 
+    	for (int i =0; i< nc; ++i) sol.add(new Tree(i));
+        for (int i = 0; i < nc+ns;++i) hijos.add(0);
+     	ArrayList<Boolean> used = new ArrayList<Boolean>();
+        for (int i = 0; i < nc;++i)used.add(true);
+        for (int i = 0; i < ns;++i)used.add(false);
     	Boolean done = false;
-    	for(int i=ns;i<ns+nc;i++){
-    		for (int j = 0; j < 25; ++j){
+    	for(int i=0;i<25;++i){
+    		for (int j = 0; j < nc; ++j){
     			int n = NearFreeS2(i,ns,nc,used,hijos);
     			done = (n == -1); 
     			if (done) break;
     			used.set(n,true);
-    			firstSol.put(n,i);
-    			hijos.set(i, hijos.get(i)+1);
+    			sol.get(j).add(new Tree(n));
+    			hijos.set(j, hijos.get(j)+1);
     		}
     		if (done) break;
     	}
     	int i = used.indexOf(false);
     	while ( i != -1 ){
-    		int n = NearFreeS2(i,ns, nc,used,hijos);
-    		firstSol.put(i, n);
-    		hijos.set(n, hijos.get(n)+1);
-    		i = used.indexOf(false);
+    		int n = NearFreeS3(i,ns, nc,used,hijos);
+                for (int j = 0; j < sol.size(); ++j){
+                    Tree t = sol.get(j).find(n,null);
+                    if (t!=null){
+                        t.add(new Tree(i));
+                        used.set(i, true);
+                    }
+                }
+                System.out.println(n);
+                hijos.set(n, hijos.get(n)+1);
+                i = used.indexOf(false);
     	}
-    	return firstSol;
-    }*/
+    	printsol();
+    }
+   
+    
+
+
+	
 
     
     public void setSol(ArrayList<Tree  > a){
